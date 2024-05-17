@@ -10,6 +10,8 @@ For further information check out the [documentation](https://raw.githack.com/SI
 
 ## Information
 
+*IMPORTANT*: If you deploy this module to your device via AppStudio, it is necessary to use the extended UI libraries which are available [here](https://supportportal.sick.com/downloads/ui-element-libraries-sensorapps/) Otherwise the ScanViewer will not be available in the UI.  
+
 Tested on:
 
 1. SIM1012        - Firmware 2.2.0
