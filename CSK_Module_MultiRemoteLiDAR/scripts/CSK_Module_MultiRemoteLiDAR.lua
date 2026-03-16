@@ -44,12 +44,18 @@ _G.logHandle:applyConfig()
 local multiRemoteLiDAR_Model = require('Sensors/MultiRemoteLiDAR/MultiRemoteLiDAR_Model')
 
 local multiRemoteLiDAR_Instances = {} -- Handle all instances
-table.insert(multiRemoteLiDAR_Instances, multiRemoteLiDAR_Model.create(1)) -- Create at least 1 instance
 
 -- Load script to communicate with the MultiRemoteLiDAR_Model UI
 -- Check / edit this script to see/edit functions which communicate with the UI
 local multiRemoteLiDARController = require('Sensors/MultiRemoteLiDAR/MultiRemoteLiDAR_Controller')
-multiRemoteLiDARController.setMultiRemoteLiDAR_Instances_Handle(multiRemoteLiDAR_Instances) -- share handle of instances
+
+if _G.availableAPIs.default and _G.availableAPIs.scanner then
+  require('Sensors/MultiRemoteLiDAR/FlowConfig/MultiRemoteLiDAR_FlowConfig')
+  table.insert(multiRemoteLiDAR_Instances, multiRemoteLiDAR_Model.create(1)) -- Create at least 1 instance
+  multiRemoteLiDARController.setMultiRemoteLiDAR_Instances_Handle(multiRemoteLiDAR_Instances) -- share handle of instances
+else
+  _G.logger:warning("CSK_MultiRemoteLiDAR: Relevant CROWN(s) not available on device. Module is not supported...")
+end
 
 --**************************************************************************
 --**********************End Global Scope ***********************************
@@ -84,6 +90,9 @@ local function main()
   -- CSK_MultiRemoteLiDAR.setEncoderTriggerEvent('CSK_Module.OnNewTrigger') -- This event will trigger a new measurement
   ----------------------------------------------------------------------------------------
 
+  if _G.availableAPIs.default and _G.availableAPIs.scanner then
+    CSK_MultiRemoteLiDAR.setSelectedInstance(1)
+  end
   CSK_MultiRemoteLiDAR.pageCalled() -- Update UI
 
 end

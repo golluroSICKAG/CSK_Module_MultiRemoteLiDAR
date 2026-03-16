@@ -51,6 +51,10 @@ Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewEncoderScanNUM', 'MultiRemoteLiDAR_
 
 Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewResult', 'MultiRemoteLiDAR_OnNewResult')
 
+Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewStatusModuleVersion', 'MultiRemoteLiDAR_OnNewStatusModuleVersion')
+Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewStatusCSKStyle', 'MultiRemoteLiDAR_OnNewStatusCSKStyle')
+Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewStatusModuleIsActive', 'MultiRemoteLiDAR_OnNewStatusModuleIsActive')
+
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnNewStatusLoadParameterOnReboot", "MultiRemoteLiDAR_OnNewStatusLoadParameterOnReboot")
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnPersistentDataModuleAvailable", "MultiRemoteLiDAR_OnPersistentDataModuleAvailable")
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnNewParameterName", "MultiRemoteLiDAR_OnNewParameterName")
@@ -73,8 +77,10 @@ Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewStatusEncoderDurationModeValue', 'M
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnNewInstanceList", "MultiRemoteLiDAR_OnNewInstanceList")
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnNewProcessingParameter", "MultiRemoteLiDAR_OnNewProcessingParameter")
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnNewSelectedInstance", "MultiRemoteLiDAR_OnNewSelectedInstance")
+
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnDataLoadedOnReboot", "MultiRemoteLiDAR_OnDataLoadedOnReboot")
 
+Script.serveEvent('CSK_MultiRemoteLiDAR.OnNewStatusFlowConfigPriority', 'MultiRemoteLiDAR_OnNewStatusFlowConfigPriority')
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnUserLevelOperatorActive", "MultiRemoteLiDAR_OnUserLevelOperatorActive")
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnUserLevelMaintenanceActive", "MultiRemoteLiDAR_OnUserLevelMaintenanceActive")
 Script.serveEvent("CSK_MultiRemoteLiDAR.OnUserLevelServiceActive", "MultiRemoteLiDAR_OnUserLevelServiceActive")
@@ -189,33 +195,42 @@ end
 --- Function to send all relevant values to UI on resume
 local function handleOnExpiredTmrMultiRemoteLiDAR()
 
-  updateUserLevel()
+  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusModuleVersion", 'v' .. multiRemoteLiDAR_Model.version)
+  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusCSKStyle", multiRemoteLiDAR_Model.styleForUI)
+  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusModuleIsActive", _G.availableAPIs.default and _G.availableAPIs.scanner)
 
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewSelectedInstance', selectedInstance)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInstanceAmount', #multiRemoteLiDAR_Instances)
+  if _G.availableAPIs.default and _G.availableAPIs.scanner then
 
-  Script.notifyEvent("MultiRemoteLiDAR_OnNewInstanceList", helperFuncs.createStringListBySize(#multiRemoteLiDAR_Instances))
+    updateUserLevel()
 
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusViewerType', multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerType)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusViewerActive', multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerActive)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewViewerID', 'multiRemoteLiDARViewer' .. tostring(selectedInstance))
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewScanViewerID', 'multiRemoteLiDARScanViewer' .. tostring(selectedInstance))
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewSelectedInstance', selectedInstance)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInstanceAmount', #multiRemoteLiDAR_Instances)
 
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInterface', multiRemoteLiDAR_Instances[selectedInstance].parameters.interface)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusSensorIP', multiRemoteLiDAR_Instances[selectedInstance].parameters.ipAddress)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusSensorType', multiRemoteLiDAR_Instances[selectedInstance].parameters.sensorType)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInternalProcessing', multiRemoteLiDAR_Instances[selectedInstance].parameters.internalProcessing)
+    Script.notifyEvent("MultiRemoteLiDAR_OnNewInstanceList", helperFuncs.createStringListBySize(#multiRemoteLiDAR_Instances))
 
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderMode', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderMode)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderModeLoop', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderModeLoop)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderTriggerEvent', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderTriggerEvent)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderDurationMode', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationMode)
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderDurationModeValue', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationModeValue)
-  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusLoadParameterOnReboot", multiRemoteLiDAR_Instances[selectedInstance].parameterLoadOnReboot)
-  Script.notifyEvent("MultiRemoteLiDAR_OnPersistentDataModuleAvailable", multiRemoteLiDAR_Instances[selectedInstance].persistentModuleAvailable)
-  Script.notifyEvent("MultiRemoteLiDAR_OnNewParameterName", multiRemoteLiDAR_Instances[selectedInstance].parametersName)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusViewerType', multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerType)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusViewerActive', multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerActive)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewViewerID', 'multiRemoteLiDARViewer' .. tostring(selectedInstance))
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewScanViewerID', 'multiRemoteLiDARScanViewer' .. tostring(selectedInstance))
 
-  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusIPError", false)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInterface', multiRemoteLiDAR_Instances[selectedInstance].parameters.interface)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusSensorIP', multiRemoteLiDAR_Instances[selectedInstance].parameters.ipAddress)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusSensorType', multiRemoteLiDAR_Instances[selectedInstance].parameters.sensorType)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInternalProcessing', multiRemoteLiDAR_Instances[selectedInstance].parameters.internalProcessing)
+
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderMode', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderMode)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderModeLoop', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderModeLoop)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderTriggerEvent', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderTriggerEvent)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderDurationMode', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationMode)
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderDurationModeValue', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationModeValue)
+
+    Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusFlowConfigPriority", multiRemoteLiDAR_Instances[selectedInstance].parameters.flowConfigPriority)
+    Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusLoadParameterOnReboot", multiRemoteLiDAR_Instances[selectedInstance].parameterLoadOnReboot)
+    Script.notifyEvent("MultiRemoteLiDAR_OnPersistentDataModuleAvailable", multiRemoteLiDAR_Instances[selectedInstance].persistentModuleAvailable)
+    Script.notifyEvent("MultiRemoteLiDAR_OnNewParameterName", multiRemoteLiDAR_Instances[selectedInstance].parametersName)
+
+    Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusIPError", false)
+  end
 
 end
 Timer.register(tmrMultiRemoteLiDAR, "OnExpired", handleOnExpiredTmrMultiRemoteLiDAR)
@@ -223,28 +238,38 @@ Timer.register(tmrMultiRemoteLiDAR, "OnExpired", handleOnExpiredTmrMultiRemoteLi
 -- ********************* UI Setting / Submit Functions Start ********************
 
 local function pageCalled()
-  updateUserLevel() -- try to hide user specific content asap
+  if _G.availableAPIs.default and _G.availableAPIs.scanner then
+    updateUserLevel() -- try to hide user specific content asap
+  end
   tmrMultiRemoteLiDAR:start()
   return ''
 end
 Script.serveFunction("CSK_MultiRemoteLiDAR.pageCalled", pageCalled)
 
 local function setSelectedInstance(instance)
-  selectedInstance = instance
-  _G.logger:info(nameOfModule .. ": New selected instance = " .. tostring(selectedInstance))
-  multiRemoteLiDAR_Instances[selectedInstance].activeInUI = true
-  Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'activeInUI', true)
-  tmrMultiRemoteLiDAR:start()
+  if #multiRemoteLiDAR_Instances >= instance then
+    selectedInstance = instance
+    _G.logger:fine(nameOfModule .. ": New selected instance = " .. tostring(selectedInstance))
+    multiRemoteLiDAR_Instances[selectedInstance].activeInUI = true
+    Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'activeInUI', true)
+    tmrMultiRemoteLiDAR:start()
+  else
+    _G.logger:warning(nameOfModule .. ": Selected instance does not exist.")
+  end
 end
 Script.serveFunction("CSK_MultiRemoteLiDAR.setSelectedInstance", setSelectedInstance)
 
 local function getInstancesAmount ()
-  return #multiRemoteLiDAR_Instances
+  if multiRemoteLiDAR_Instances then
+    return #multiRemoteLiDAR_Instances
+  else
+    return 0
+  end
 end
 Script.serveFunction("CSK_MultiRemoteLiDAR.getInstancesAmount", getInstancesAmount)
 
 local function addInstance()
-  _G.logger:info(nameOfModule .. ": Add instance")
+  _G.logger:fine(nameOfModule .. ": Add instance")
   table.insert(multiRemoteLiDAR_Instances, multiRemoteLiDAR_Model.create(#multiRemoteLiDAR_Instances+1))
   Script.deregister("CSK_MultiRemoteLiDAR.OnNewValueToForward" .. tostring(#multiRemoteLiDAR_Instances) , handleOnNewValueToForward)
   Script.register("CSK_MultiRemoteLiDAR.OnNewValueToForward" .. tostring(#multiRemoteLiDAR_Instances) , handleOnNewValueToForward)
@@ -275,7 +300,7 @@ end
 Script.serveFunction('CSK_MultiRemoteLiDAR.getLiDARHandle', getLiDARHandle)
 
 local function setViewerType(viewerType)
-  _G.logger:info(nameOfModule .. ": Set viewer type to " .. viewerType)
+  _G.logger:fine(nameOfModule .. ": Set viewer type to " .. viewerType)
   multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerType = viewerType
   Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusViewerType', multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerType)
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'viewerType', viewerType)
@@ -283,14 +308,14 @@ end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setViewerType', setViewerType)
 
 local function setViewerActive(status)
-  _G.logger:info(nameOfModule .. ": Set viewer active to " .. tostring(status))
+  _G.logger:fine(nameOfModule .. ": Set viewer active to " .. tostring(status))
   multiRemoteLiDAR_Instances[selectedInstance].parameters.viewerActive = status
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'viewerActive', status)
 end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setViewerActive', setViewerActive)
 
 local function setInterface(interface)
-  _G.logger:info(nameOfModule .. ": Set interface to " .. interface)
+  _G.logger:fine(nameOfModule .. ": Set interface to " .. interface)
   multiRemoteLiDAR_Instances[selectedInstance].parameters.interface = interface
   Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusInterface', multiRemoteLiDAR_Instances[selectedInstance].parameters.interface)
 end
@@ -301,24 +326,24 @@ local function setIP(ip)
 
   if suc then
     Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusIPError", false)
-    _G.logger:info(nameOfModule .. ": Set IP to " .. ip)
+    _G.logger:fine(nameOfModule .. ": Set IP to " .. ip)
     multiRemoteLiDAR_Instances[selectedInstance].parameters.ipAddress = ip
   else
-    _G.logger:info(nameOfModule .. ": IP is not valid: " .. tostring(ip))
+    _G.logger:fine(nameOfModule .. ": IP is not valid: " .. tostring(ip))
     Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusIPError", true)
   end
 end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setIP', setIP)
 
 local function setSensorType(sensorType)
-  _G.logger:info(nameOfModule .. ": Set sensor type to " .. sensorType)
+  _G.logger:fine(nameOfModule .. ": Set sensor type to " .. sensorType)
   multiRemoteLiDAR_Instances[selectedInstance].parameters.sensorType = sensorType
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'sensorType', multiRemoteLiDAR_Instances[selectedInstance].parameters.sensorType)
 end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setSensorType', setSensorType)
 
 local function setInternalProcessing(status)
-  _G.logger:info(nameOfModule .. ": Set internal processing to " .. tostring(status))
+  _G.logger:fine(nameOfModule .. ": Set internal processing to " .. tostring(status))
   multiRemoteLiDAR_Instances[selectedInstance].parameters.internalProcessing = status
   if multiRemoteLiDAR_Instances[selectedInstance].parameters.internalProcessing then
     Script.notifyEvent("MultiRemoteLiDAR_OnRegisterLiDARSensor" .. tostring(selectedInstance), multiRemoteLiDAR_Instances[selectedInstance].lidarProvider)
@@ -330,7 +355,7 @@ Script.serveFunction('CSK_MultiRemoteLiDAR.setInternalProcessing', setInternalPr
 
 local function setEncoderMode(status)
   if _G.availableAPIs.encoder then
-    _G.logger:info(nameOfModule .. ": Set encoder mode of sensor no. " .. tostring(selectedInstance) .. "to " .. tostring(status))
+    _G.logger:fine(nameOfModule .. ": Set encoder mode of sensor no. " .. tostring(selectedInstance) .. "to " .. tostring(status))
     multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderMode = status
 
     if status then
@@ -345,14 +370,14 @@ end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setEncoderMode', setEncoderMode)
 
 local function setEncoderTriggerEvent(event)
-  _G.logger:info(nameOfModule .. ": Set encoderTriggerEvent to " .. event)
+  _G.logger:fine(nameOfModule .. ": Set encoderTriggerEvent to " .. event)
   multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderTriggerEvent = event
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'encoderTriggerEvent', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderTriggerEvent)
 end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setEncoderTriggerEvent', setEncoderTriggerEvent)
 
 local function setEncoderModeLoop(status)
-  _G.logger:info(nameOfModule .. ": Set encoder loop mode to " .. tostring(status))
+  _G.logger:fine(nameOfModule .. ": Set encoder loop mode to " .. tostring(status))
   multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderModeLoop = status
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'encoderModeLoop', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderModeLoop)
   Script.notifyEvent('MultiRemoteLiDAR_OnNewStatusEncoderModeLoop', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderModeLoop)
@@ -360,14 +385,14 @@ end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setEncoderModeLoop', setEncoderModeLoop)
 
 local function setEncoderDurationMode(mode)
-  _G.logger:info(nameOfModule .. ": Set encoderDurationMode to " .. mode)
+  _G.logger:fine(nameOfModule .. ": Set encoderDurationMode to " .. mode)
   multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationMode = mode
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'encoderDurationMode', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationMode)
 end
 Script.serveFunction('CSK_MultiRemoteLiDAR.setEncoderDurationMode', setEncoderDurationMode)
 
 local function setEncoderDurationModeValue(value)
-  _G.logger:info(nameOfModule .. ": Set encoderDurationModeValue to " .. value)
+  _G.logger:fine(nameOfModule .. ": Set encoderDurationModeValue to " .. value)
   multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationModeValue = value
   Script.notifyEvent('MultiRemoteLiDAR_OnNewProcessingParameter', selectedInstance, 'encoderDurationModeValue', multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderDurationModeValue)
 end
@@ -408,22 +433,46 @@ local function updateProcessingParameters()
     if multiRemoteLiDAR_Instances[selectedInstance].parameters.encoderMode == true then
       _G.logger:warning(nameOfModule .. ": Related CROWNs for encoder mode not available.")
     else
-      _G.logger:info(nameOfModule .. ": Related CROWNs for encoder mode not available.")      
+      _G.logger:info(nameOfModule .. ": Related CROWNs for encoder mode not available.")
     end
   end
 end
+
+local function getStatusModuleActive()
+  return _G.availableAPIs.default and _G.availableAPIs.scanner
+end
+Script.serveFunction('CSK_MultiRemoteLiDAR.getStatusModuleActive', getStatusModuleActive)
+
+local function clearFlowConfigRelevantConfiguration()
+  for i = 1, #multiRemoteLiDAR_Instances do
+    if multiRemoteLiDAR_Instances[i].parameters.flowConfigPriority == true then
+      setSelectedInstance(i)
+      stopLiDARSensor()
+    end
+  end
+end
+Script.serveFunction('CSK_MultiRemoteLiDAR.clearFlowConfigRelevantConfiguration', clearFlowConfigRelevantConfiguration)
+
+local function getParameters(instanceNo)
+  if instanceNo <= #multiRemoteLiDAR_Instances then
+    return helperFuncs.json.encode(multiRemoteLiDAR_Instances[instanceNo].parameters)
+  else
+    return ''
+  end
+end
+Script.serveFunction('CSK_MultiRemoteLiDAR.getParameters', getParameters)
 
 -- *****************************************************************
 -- Following function can be adapted for CSK_PersistentData module usage
 -- *****************************************************************
 
 local function setParameterName(name)
-  _G.logger:info(nameOfModule .. ": Set parameter name = " .. tostring(name))
+  _G.logger:fine(nameOfModule .. ": Set parameter name = " .. tostring(name))
   multiRemoteLiDAR_Instances[selectedInstance].parametersName = name
 end
 Script.serveFunction("CSK_MultiRemoteLiDAR.setParameterName", setParameterName)
 
-local function sendParameters()
+local function sendParameters(noDataSave)
   if multiRemoteLiDAR_Instances[selectedInstance].persistentModuleAvailable then
     CSK_PersistentData.addParameter(helperFuncs.convertTable2Container(multiRemoteLiDAR_Instances[selectedInstance].parameters), multiRemoteLiDAR_Instances[selectedInstance].parametersName)
 
@@ -433,8 +482,10 @@ local function sendParameters()
     else
       CSK_PersistentData.setModuleParameterName(nameOfModule, multiRemoteLiDAR_Instances[selectedInstance].parametersName, multiRemoteLiDAR_Instances[selectedInstance].parameterLoadOnReboot, tostring(selectedInstance))
     end
-    _G.logger:info(nameOfModule .. ": Send MultiRemoteLiDAR parameters with name '" .. multiRemoteLiDAR_Instances[selectedInstance].parametersName .. "' to CSK_PersistentData module.")
-    CSK_PersistentData.saveData()
+    _G.logger:fine(nameOfModule .. ": Send MultiRemoteLiDAR parameters with name '" .. multiRemoteLiDAR_Instances[selectedInstance].parametersName .. "' to CSK_PersistentData module.")
+    if not noDataSave then
+      CSK_PersistentData.saveData()
+    end
   else
     _G.logger:warning(nameOfModule .. ": CSK_PersistentData module not available.")
   end
@@ -448,25 +499,39 @@ local function loadParameters()
       _G.logger:info(nameOfModule .. ": Loaded parameters for multiRemoteLiDARObject " .. tostring(selectedInstance) .. " from CSK_PersistentData module.")
       multiRemoteLiDAR_Instances[selectedInstance].parameters = helperFuncs.convertContainer2Table(data)
 
+      multiRemoteLiDAR_Instances[selectedInstance].parameters = helperFuncs.checkParameters(multiRemoteLiDAR_Instances[selectedInstance].parameters, helperFuncs.defaultParameters.getParameters())
+
       -- If something needs to be configured/activated with new loaded data
       updateProcessingParameters()
 
-      CSK_MultiRemoteLiDAR.pageCalled()
+      tmrMultiRemoteLiDAR:start()
+      return true
     else
       _G.logger:warning(nameOfModule .. ": Loading parameters from CSK_PersistentData module did not work.")
+      tmrMultiRemoteLiDAR:start()
+      return false
     end
   else
     _G.logger:warning(nameOfModule .. ": CSK_PersistentData module not available.")
+    tmrMultiRemoteLiDAR:start()
+    return false
   end
-  tmrMultiRemoteLiDAR:start()
 end
 Script.serveFunction("CSK_MultiRemoteLiDAR.loadParameters", loadParameters)
 
 local function setLoadOnReboot(status)
   multiRemoteLiDAR_Instances[selectedInstance].parameterLoadOnReboot = status
-  _G.logger:info(nameOfModule .. ": Set new status to load setting on reboot: " .. tostring(status))
+  _G.logger:fine(nameOfModule .. ": Set new status to load setting on reboot: " .. tostring(status))
+  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusLoadParameterOnReboot", status)
 end
 Script.serveFunction("CSK_MultiRemoteLiDAR.setLoadOnReboot", setLoadOnReboot)
+
+local function setFlowConfigPriority(status)
+  multiRemoteLiDAR_Instances[selectedInstance].parameters.flowConfigPriority = status
+  _G.logger:fine(nameOfModule .. ": Set new status of FlowConfig priority: " .. tostring(status))
+  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusFlowConfigPriority", multiRemoteLiDAR_Instances[selectedInstance].parameters.flowConfigPriority)
+end
+Script.serveFunction('CSK_MultiRemoteLiDAR.setFlowConfigPriority', setFlowConfigPriority)
 
 --- Function to setup sensors after bootup
 local function setupSensorsAfterBootUp()
@@ -490,56 +555,75 @@ Timer.register(tmrSensorBootUp, 'OnExpired', setupSensorsAfterBootUp)
 --- Function to react on initial load of persistent parameters
 local function handleOnInitialDataLoaded()
 
-  _G.logger:info(nameOfModule .. ': Try to initially load parameter from CSK_PersistentData module.')
-  if string.sub(CSK_PersistentData.getVersion(), 1, 1) == '1' then
+  if _G.availableAPIs.default and _G.availableAPIs.scanner then
 
-    _G.logger:warning(nameOfModule .. ': CSK_PersistentData module is too old and will not work. Please update CSK_PersistentData module.')
+    _G.logger:fine(nameOfModule .. ': Try to initially load parameter from CSK_PersistentData module.')
+    if string.sub(CSK_PersistentData.getVersion(), 1, 1) == '1' then
 
-    for j = 1, #multiRemoteLiDAR_Instances do
-      multiRemoteLiDAR_Instances[j].persistentModuleAvailable = false
-    end
-  else
+      _G.logger:warning(nameOfModule .. ': CSK_PersistentData module is too old and will not work. Please update CSK_PersistentData module.')
 
-    local bootUpBreak = false
+      for j = 1, #multiRemoteLiDAR_Instances do
+        multiRemoteLiDAR_Instances[j].persistentModuleAvailable = false
+      end
+    else
 
-    -- Check if CSK_PersistentData version is >= 3.0.0
-    if tonumber(string.sub(CSK_PersistentData.getVersion(), 1, 1)) >= 3 then
-      local parameterName, loadOnReboot, totalInstances = CSK_PersistentData.getModuleParameterName(nameOfModule, '1')
-      -- Check for amount if instances to create
-      if totalInstances then
-        local c = 2
-        while c <= totalInstances do
-          addInstance()
-          c = c+1
+      local bootUpBreak = false
+
+      -- Check if CSK_PersistentData version is >= 3.0.0
+      if tonumber(string.sub(CSK_PersistentData.getVersion(), 1, 1)) >= 3 then
+        local parameterName, loadOnReboot, totalInstances = CSK_PersistentData.getModuleParameterName(nameOfModule, '1')
+        -- Check for amount if instances to create
+        if totalInstances then
+          local c = 2
+          while c <= totalInstances do
+            addInstance()
+            c = c+1
+          end
         end
       end
-    end
 
-    for i = 1, #multiRemoteLiDAR_Instances do
-      local parameterName, loadOnReboot = CSK_PersistentData.getModuleParameterName(nameOfModule, tostring(i))
-
-      if parameterName then
-        multiRemoteLiDAR_Instances[i].parametersName = parameterName
-        multiRemoteLiDAR_Instances[i].parameterLoadOnReboot = loadOnReboot
+      if not multiRemoteLiDAR_Instances then
+        return
       end
 
-      if multiRemoteLiDAR_Instances[i].parameterLoadOnReboot then
-        bootUpBreak = true
+      for i = 1, #multiRemoteLiDAR_Instances do
+        local parameterName, loadOnReboot = CSK_PersistentData.getModuleParameterName(nameOfModule, tostring(i))
+
+        if parameterName then
+          multiRemoteLiDAR_Instances[i].parametersName = parameterName
+          multiRemoteLiDAR_Instances[i].parameterLoadOnReboot = loadOnReboot
+        end
+
+        if multiRemoteLiDAR_Instances[i].parameterLoadOnReboot then
+          bootUpBreak = true
+        end
       end
-    end
 
-    if bootUpBreak then
-      _G.logger:info(nameOfModule .. ": Wait for sensor(s) power bootUp")
+      if bootUpBreak then
+        _G.logger:info(nameOfModule .. ": Wait for sensor(s) power bootUp")
 
-      tmrSensorBootUp:start()
-      bootUpStatus = true
+        tmrSensorBootUp:start()
+        bootUpStatus = true
 
-    else
-      setupSensorsAfterBootUp()
+      else
+        setupSensorsAfterBootUp()
+      end
     end
   end
 end
 Script.register("CSK_PersistentData.OnInitialDataLoaded", handleOnInitialDataLoaded)
+
+local function resetModule()
+  if _G.availableAPIs.default and _G.availableAPIs.scanner then
+    for i = 1, #multiRemoteLiDAR_Instances do
+      setSelectedInstance(i)
+      stopLiDARSensor()
+    end
+    pageCalled()
+  end
+end
+Script.serveFunction('CSK_MultiRemoteLiDAR.resetModule', resetModule)
+Script.register("CSK_PersistentData.OnResetAllModules", resetModule)
 
 return funcs
 

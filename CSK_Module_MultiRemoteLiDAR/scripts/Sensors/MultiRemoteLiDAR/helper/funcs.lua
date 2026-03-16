@@ -7,9 +7,13 @@
 --**********************Start Global Scope *********************************
 --**************************************************************************
 
+local nameOfModule = 'CSK_MultiRemoteLiDAR'
+
 local funcs = {}
 -- Providing standard JSON functions
 funcs.json = require('Sensors/MultiRemoteLiDAR/helper/Json')
+-- Default parameters for instances of module
+funcs.defaultParameters = require('Sensors/MultiRemoteLiDAR/MultiRemoteLiDAR_Parameters')
 
 --**************************************************************************
 --********************** End Global Scope **********************************
@@ -128,19 +132,44 @@ funcs.createJsonList = createJsonList
 ---@param content string[] Table with data entries
 ---@return string list String list
 local function createStringListBySimpleTable(content)
-  local list = "["
-  if #content >= 1 then
-    list = list .. '"' .. content[1] .. '"'
-  end
-  if #content >= 2 then
-    for i=2, #content do
-      list = list .. ', ' .. '"' .. content[i] .. '"'
+  if content then
+    local list = "["
+    if #content >= 1 then
+      list = list .. '"' .. content[1] .. '"'
     end
+    if #content >= 2 then
+      for i=2, #content do
+        list = list .. ', ' .. '"' .. content[i] .. '"'
+      end
+    end
+    list = list .. "]"
+    return list
+  else
+    return ''
   end
-  list = list .. "]"
-  return list
 end
 funcs.createStringListBySimpleTable = createStringListBySimpleTable
+
+--- Function to compare table content. Optionally will fill missing values within content table with values of defaultTable
+---@param content auto Data to check
+---@param defaultTable auto Reference data
+---@return auto[] content Update of data
+local function checkParameters(content, defaultTable)
+  for key, value in pairs(defaultTable) do
+    if type(value) == 'table' then
+      if content[key] == nil then
+        _G.logger:info(nameOfModule .. ": Created missing parameters table '" .. tostring(key) .. "'")
+        content[key] = {}
+      end
+      content[key] = checkParameters(content[key], defaultTable[key])
+    elseif content[key] == nil then
+      _G.logger:info(nameOfModule .. ": Missing parameter '" .. tostring(key) .. "'. Adding default value '" .. tostring(defaultTable[key]) .. "'")
+      content[key] = defaultTable[key]
+    end
+  end
+  return content
+end
+funcs.checkParameters = checkParameters
 
 return funcs
 

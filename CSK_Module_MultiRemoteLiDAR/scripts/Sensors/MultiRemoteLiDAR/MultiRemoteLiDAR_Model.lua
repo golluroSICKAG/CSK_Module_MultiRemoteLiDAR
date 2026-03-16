@@ -13,11 +13,21 @@ local nameOfModule = 'CSK_MultiRemoteLiDAR'
 local multiRemoteLiDAR = {}
 multiRemoteLiDAR.__index = multiRemoteLiDAR
 
+multiRemoteLiDAR.styleForUI = 'None' -- Optional parameter to set UI style
+multiRemoteLiDAR.version = Engine.getCurrentAppVersion() -- Version of module
+
 --**************************************************************************
 --********************** End Global Scope **********************************
 --**************************************************************************
 --**********************Start Function Scope *******************************
 --**************************************************************************
+
+--- Function to react on UI style change
+local function handleOnStyleChanged(theme)
+  multiRemoteLiDAR.styleForUI = theme
+  Script.notifyEvent("MultiRemoteLiDAR_OnNewStatusCSKStyle", multiRemoteLiDAR.styleForUI)
+end
+Script.register('CSK_PersistentData.OnNewStatusCSKStyle', handleOnStyleChanged)
 
 --- Function to create new instance
 ---@param multiRemoteLiDARInstanceNo int Number of instance
@@ -52,18 +62,10 @@ function multiRemoteLiDAR.create(multiRemoteLiDARInstanceNo)
 
     -- Parameters to be saved permanently if wanted
     self.parameters = {}
-    self.parameters.interface = 'ETHERNET' -- Interface connection type to the sensor
-    self.parameters.ipAddress = '192.168.1.10' ..  self.multiRemoteLiDARInstanceNoString -- IP of the LiDAR sensor
-    self.parameters.sensorType = 'LMSX00' --'LMSX00' -- LiDAR type
-    self.parameters.processingFile = 'CSK_MultiRemoteLiDAR_Processing' -- which file to use for processing (will be started in own thread)
-    self.parameters.internalProcessing = true -- should incoming scans be processed within this module or just provided for others
-    self.parameters.viewerType = 'Scan' -- 'Scan' / 'PointCloud' - type of viewer to show data
-    self.parameters.viewerActive = true -- Should the scan be shown in viewer
-    self.parameters.encoderMode = false -- Combine scan data with encoder data to create point cloud
-    self.parameters.encoderTriggerEvent = '' -- Event to start the encoder scan measurement
-    self.parameters.encoderModeLoop = false -- Should it retrigger the encoder measurement automatically
-    self.parameters.encoderDurationMode = 'TICKS' -- Encoder duration mode 'TICKS' (maybe add in future 'DISTANCE', 'TIME', 'CONVEYOR_TIMEOUT')
-    self.parameters.encoderDurationModeValue = 200 -- Related to encoderDurationMode, value to determine how long LiDAR data should be collected combined with encoder data before providing PointCloud
+    self.parameters = self.helperFuncs.defaultParameters.getParameters() -- Load default parameters
+
+    -- Instance specific parameters
+    self.parameters.ipAddress = '192.168.1.10' ..  self.multiRemoteLiDARInstanceNoString
 
     self.lidarProvider:setInterface(self.parameters.interface)
     self.lidarProvider:setIPAddress(self.parameters.ipAddress)

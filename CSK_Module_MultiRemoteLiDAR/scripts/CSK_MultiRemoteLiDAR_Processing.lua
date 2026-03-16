@@ -184,7 +184,7 @@ local function handleOnNewProcessing(scan)
   --_G.logger:info(nameOfModule .. ": Processing on MultiRemoteLiDAR" .. lidarInstanceNumberString .. " was = " .. tostring(result))
   --Script.notifyEvent('MultiRemoteLiDAR_OnNewResult'.. lidarInstanceNumberString, true)
 
-  --Script.notifyEvent("MultiRemoteLiDAR_OnNewValueToForward" .. lidarInstanceNumberString, 'MultiColorSelection_CustomEventName', 'content')
+  --Script.notifyEvent("MultiRemoteLiDAR_OnNewValueToForward" .. lidarInstanceNumberString, 'MultiRemoteLiDAR_CustomEventName', 'content')
   ]]
 
 end
@@ -221,7 +221,7 @@ Script.register("CSK_MultiRemoteLiDAR.OnDeregisterLiDARSensor" .. lidarInstanceN
 local function handleOnNewProcessingParameter(multiRemoteLiDARNo, parameter, value)
 
   if multiRemoteLiDARNo == lidarInstanceNumber then -- set parameter only in selected script
-    _G.logger:info(nameOfModule .. ": Update parameter '" .. parameter .. "' of multiRemoteLiDARInstanceNo." .. tostring(multiRemoteLiDARNo) .. " to value = " .. tostring(value))
+    _G.logger:fine(nameOfModule .. ": Update parameter '" .. parameter .. "' of multiRemoteLiDARInstanceNo." .. tostring(multiRemoteLiDARNo) .. " to value = " .. tostring(value))
 
     if parameter == 'encoderMode' then
 

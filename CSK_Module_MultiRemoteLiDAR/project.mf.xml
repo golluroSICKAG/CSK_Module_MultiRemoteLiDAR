@@ -100,7 +100,7 @@ INFO: Other modules can check via "Script.isServedAsEvent" if event of sepecific
                 </event>
                 <event name="OnNewValueUpdateNUM">
                     <desc>Example of dynamically created event to sync paramters between instance threads and Controller part of module. +
-NUM will be replaced by the number of instance (e.g. "OnNewResult1"). +</desc>
+NUM will be replaced by the number of instance (e.g. "OnNewValueUpdate1"). +</desc>
                     <param desc="Instance new value is coming from." multiplicity="1" name="instance" type="int"/>
                     <param desc="Name of the paramter to update/sync." multiplicity="1" name="parameter" type="string"/>
                     <param desc="Value to update." multiplicity="1" name="value" type="auto"/>
@@ -108,7 +108,7 @@ NUM will be replaced by the number of instance (e.g. "OnNewResult1"). +</desc>
                 </event>
                 <event name="OnNewValueToForwardNUM">
                     <desc>Example of dynamically created event to forward data from instance thread to Controler part of module, e.g. to forward values to UI. +
-NUM will be replaced by the number of instance (e.g. "OnNewResult1").</desc>
+NUM will be replaced by the number of instance (e.g. "OnNewValueToForward1").</desc>
                     <param desc="Eventname to use to forward value." multiplicity="1" name="eventname" type="string"/>
                     <param desc="Value to forward." multiplicity="1" name="value" type="auto"/>
                 </event>
@@ -195,15 +195,29 @@ INFO: Other modules can check via "Script.isServedAsEvent" if event of sepecific
                     <desc>Notify event to start encoder scan measurement if notified.</desc>
                     <param desc="Name of event" multiplicity="1" name="event" type="string"/>
                 </event>
+                <event name="OnNewStatusFlowConfigPriority">
+                    <desc>Notify if FlowConfig should have priority for FlowConfig relevant configurations.</desc>
+                    <param desc="Status" multiplicity="1" name="status" type="bool"/>
+                </event>
+                <event name="OnNewStatusCSKStyle">
+                    <desc>Notify UI style to use for CSK modules.</desc>
+                    <param desc="UI style" multiplicity="1" name="theme" type="string"/>
+                </event>
+                <event name="OnNewStatusModuleVersion">
+                    <desc>Notify version of module.</desc>
+                    <param desc="Version" multiplicity="1" name="version" type="string"/>
+                </event>
+                <event name="OnNewStatusModuleIsActive">
+                    <desc>Notify if module can be used on device.</desc>
+                    <param desc="Status" multiplicity="1" name="status" type="bool"/>
+                </event>
                 <function name="setParameterName">
                     <desc>Function to set the name of the parameters if saved/loaded via the CSK_PersistentData module.</desc>
                     <param desc="Name of the parameter" multiplicity="1" name="name" type="string"/>
                 </function>
                 <function name="sendParameters">
                     <desc>Send parameters to CSK_PersistentData module if possible to save them.</desc>
-                </function>
-                <function name="loadParameters">
-                    <desc>Load parameters for this module from the CSK_PersistentData module if possible and use them.</desc>
+                    <param desc="[Optional] Set to TRUE if the data should NOT be saved immediately after sending." multiplicity="?" name="noDataSave" type="bool"/>
                 </function>
                 <function name="setLoadOnReboot">
                     <desc>Configure if this module should load its saved parameters at app/device boot up.</desc>
@@ -294,10 +308,88 @@ IMPORTANT: As instances start their own threads, the module needs to be restarte
                     <desc>Function to set event to start encoder measurement if notified.</desc>
                     <param desc="Name of event" multiplicity="1" name="event" type="string"/>
                 </function>
+                <function name="clearFlowConfigRelevantConfiguration">
+                    <desc>Function to clear FlowConfig relevant configurations.</desc>
+                </function>
+                <function name="setFlowConfigPriority">
+                    <desc>Function to configure if FlowConfig should have priority for FlowConfig relevant configuration.</desc>
+                    <param desc="Status" multiplicity="1" name="status" type="bool"/>
+                </function>
+                <function name="loadParameters">
+                    <desc>Load parameters for this module from the CSK_PersistentData module if possible and use them.</desc>
+                    <param desc="Success to load parameters." multiplicity="1" name="success" type="bool"/>
+                </function>
+                <function name="getStatusModuleActive">
+                    <desc>Function to get status if module is active.</desc>
+                    <return desc="Status" multiplicity="1" name="status" type="bool"/>
+                </function>
+                <function name="getParameters">
+                    <trait>released</trait>
+                    <desc>Function to get all parameters of the client in JSON format.</desc>
+                    <param desc="Number of instance to get parameters from." multiplicity="1" name="instanceNo" type="int"/>
+                    <return desc="JSON string with all parameters." multiplicity="1" name="jsonParameters" type="string"/>
+                </function>
+                <function name="resetModule">
+                    <desc>Function to reset main configuration of module.</desc>
+                </function>
             </serves>
         </crown>
+        <crown name="MultiRemoteLiDAR_FC">
+            <trait>released</trait>
+            <desc>Crown to provide CSK_FlowConfig relevant features.</desc>
+            <enum name="ScanMode" trait="released">
+                <desc>Mode to provide scan source.</desc>
+                <item desc="Provide handle of scanner [recommended]." name="HANDLE">HANDLE</item>
+                <item desc="Provide scans of sensor." name="SCANS">SCANS</item>
+            </enum>
+            <serves/>
+            <crown name="OnNewScan">
+                <trait>released</trait>
+                <desc>Provide scan acquired by sensor.</desc>
+                <serves>
+                    <event name="OnNewScan">
+                        <include>data-flow</include>
+                        <desc>Provide scan acquired by sensor.</desc>
+                        <param desc="Handle to internally used FlowConfig instance." multiplicity="1" name="handle" type="handle"/>
+                        <param desc="'CSK_MultiRemoteLiDAR.OnNewScanSensor[InstanceNUM]' or 'HANDLE[NUM]'&#10;&#10;Parameter:&#10;&#10;MODE = HANDLE&#10;1: Command to get Handle (Scan.Provider.RemoteScanner)&#10;&#10;MODE = SCANS&#10;1: Scan (Scan)" multiplicity="1" name="OnNewScan" type="string"/>
+                    </event>
+                    <function name="create">
+                        <trait>released</trait>
+                        <desc>Internally used CSK_FlowConfig create function.</desc>
+                        <param constraint="1-99" desc="Numeric identifier of scanner instance." multiplicity="1" name="Instance" type="int"/>
+                        <param desc="Mode to provide source.&#10;&#10;'HANDLE' = Receiver gets command to get ScanProvider handle (recommended)&#10;&#10;'SCANS' = Receiver gets scans directly" multiplicity="1" name="Mode" ref="MultiRemoteLiDAR_FC.ScanMode" type="enum"/>
+                        <return desc="Handle to internally used FlowConfig instance." multiplicity="1" name="handle" type="handle"/>
+                    </function>
+                    <function name="register">
+                        <trait>released</trait>
+                        <desc>Internally used CSK_FlowConfig register function.</desc>
+                        <param desc="Handle to internally used FlowConfig instance." multiplicity="1" name="handle" type="handle"/>
+                        <param desc="Internal parameter (not used)." multiplicity="1" name="eventname" type="string"/>
+                        <param desc="Internally used callback function." multiplicity="1" name="callback" type="string"/>
+                        <return desc="Success of register process." multiplicity="1" name="success" type="bool"/>
+                    </function>
+                </serves>
+            </crown>
+            <crown name="EncoderSource">
+                <desc>Set source of encoder and optional trigger event.</desc>
+                <serves>
+                    <function name="create">
+                        <desc>Internally used CSK_FlowConfig create function.</desc>
+                        <param constraint="1-99" desc="Numeric identifier of sensor." multiplicity="1" name="Instance" type="int"/>
+                        <return desc="Handle to internally used FlowConfig instance." multiplicity="1" name="handle" type="handle"/>
+                    </function>
+                    <function name="encoderSource">
+                        <include>data-flow</include>
+                        <desc>Set source of encoder and optional trigger event.</desc>
+                        <param desc="Handle to internally used FlowConfig instance." multiplicity="1" name="handle" type="handle"/>
+                        <param desc="Encoder to use&#10;&#10;Parameter:&#10;1: Handle (Encoder)" multiplicity="1" name="encoder" type="string"/>
+                        <param desc="Trigger event to start scan in encoder mode.&#10;&#10;Parameter:&#10;1: Event (STRING)" multiplicity="?" name="trigger" type="string"/>
+                    </function>
+                </serves>
+            </crown>
+        </crown>
         <meta key="author">SICK AG</meta>
-        <meta key="version">0.4.0</meta>
+        <meta key="version">0.5.0</meta>
         <meta key="priority">low</meta>
         <meta key="copy-protected">false</meta>
         <meta key="read-protected">false</meta>

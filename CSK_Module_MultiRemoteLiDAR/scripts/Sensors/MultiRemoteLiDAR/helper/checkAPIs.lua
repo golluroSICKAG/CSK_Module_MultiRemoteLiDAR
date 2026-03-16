@@ -5,19 +5,18 @@
 
 local availableAPIs = {}
 
+-- Function to load all default APIs
 local function loadAPIs()
   CSK_MultiRemoteLiDAR = require 'API.CSK_MultiRemoteLiDAR'
 
-  Container = require 'API.Container'
-  Engine = require 'API.Engine'
   Log = require 'API.Log'
   Log.Handler = require 'API.Log.Handler'
   Log.SharedLogger = require 'API.Log.SharedLogger'
+
+  Container = require 'API.Container'
+  Engine = require 'API.Engine'
   Object = require 'API.Object'
   Timer = require 'API.Timer'
-  View = require 'API.View'
-  View.PointCloudDecoration = require 'API.View.PointCloudDecoration'
-  View.ScanDecoration = require 'API.View.ScanDecoration'
 
   -- Check if related CSK modules are available to be used
   local appList = Engine.listApps()
@@ -26,10 +25,13 @@ local function loadAPIs()
       CSK_PersistentData = require 'API.CSK_PersistentData'
     elseif appList[i] == 'CSK_Module_UserManagement' then
       CSK_UserManagement = require 'API.CSK_UserManagement'
+    elseif appList[i] == 'CSK_Module_FlowConfig' then
+      CSK_FlowConfig = require 'API.CSK_FlowConfig'
     end
   end
 end
 
+-- Function to load specific scanner APIs
 local function loadScannerAPIs()
   -- If you want to check for specific APIs/functions supported on the device the module is running, place relevant APIs here
   -- e.g.:
@@ -39,8 +41,12 @@ local function loadScannerAPIs()
   Scan.Provider = {}
   Scan.Provider.RemoteScanner = require 'API.Scan.Provider.RemoteScanner'
   Scan.Transform = require 'API.Scan.Transform'
+  View = require 'API.View'
+  View.PointCloudDecoration = require 'API.View.PointCloudDecoration'
+  View.ScanDecoration = require 'API.View.ScanDecoration'
 end
 
+-- Function to load specific encoder APIs
 local function loadEncoderAPIs()
   -- If you want to check for specific APIs/functions supported on the device the module is running, place relevant APIs here
   -- e.g.:
